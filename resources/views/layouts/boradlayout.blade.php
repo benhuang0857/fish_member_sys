@@ -154,29 +154,70 @@
 				$(this).css("border", "3px solid rgb(250, 137, 44)");
 				$( "#seat input[type=button]" ).not(this).css("border", "3px solid  rgb(27, 29, 27)");
 				$("#seat-num").val(i);
+				let uid = $( "#seat"+ i +"_memid" ).val();
+				let html =  '<option value="無">無</option>'+
+                            '@foreach ($USERS as $USER)'+
+                            '<option value="{{$USER->id}}">{{$USER->phone}} ({{$USER->name}})</option>'+
+                            '@endforeach';
+				$.ajax({
+					success: function(result) {
+						$("#select_member").html(html);
+						$('#select_member option[value="'+uid+'"]').prop('selected', true);
+					},
+					error: function(result) {
+						alert('發生錯誤');
+					}
+				});
 			});
 		}
 
-		$('form input[type=button]').click(function(){
-
+		$('#binding').click(function(){
 			$.ajax({
-				//type: "POST",
-				//url: "/pages/test/",
 				success: function(result) {
-					alert('綁定成功');
 					let seat_num = $("#seat-num").val();
 					let selected_mem = $('#select_member :selected').text();
-					$( "#seat"+ seat_num ).val(selected_mem);
-					$( "#seat"+ seat_num ).css("background", "rgb(54, 152, 245)");
+					let selected_mem_id = $('#select_member :selected').val();
+					if (selected_mem == '無')
+					{
+						alert('請選擇會員在進行綁定');
+						$( "#seat"+ seat_num ).val(selected_mem);
+						$( "#seat"+ seat_num ).css("background", "#6cd670");
+					}	
+					else
+					{
+						alert('綁定成功');
+						selected_mem_name = selected_mem.split(' ');
+						$( "#seat"+ seat_num ).val(selected_mem_name[1]);
+						$( "#seat"+seat_num+"_memid" ).val(selected_mem_id);
+						$( "#seat"+ seat_num ).css("background", "rgb(54, 152, 245)");
+					}
 				},
 				error: function(result) {
-					alert('error');
+					alert('發生錯誤binding-error');
 				}
 			});
 		});
 
 		$('#start-game').click(function(){
-			alert('遊戲開始！開始記錄');
+			let seat_num = $("#seat-num").val();
+			let select_member_id = $("#select_member").val();
+			//$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+			$.ajax({
+				headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+				type: "POST",
+				url: "/gamestart",
+				data: { 
+					uid: select_member_id,
+					mac: '123456',
+					seat_num: seat_num,
+				},
+				success: function(result) {
+					alert(select_member_id);
+				},
+				error: function(result) {
+					alert('發生錯誤start-game-error');
+				}
+			});
 		});
 
 		$('#close-game').click(function(){

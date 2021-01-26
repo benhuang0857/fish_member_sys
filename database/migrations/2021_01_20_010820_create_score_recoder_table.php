@@ -16,8 +16,11 @@ class CreateScoreRecoderTable extends Migration
         Schema::create('score_recoder', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('uid');
-            $table->integer('bet');
-            $table->integer('credits');
+            $table->string('mac');
+            $table->string('seat_num');
+            $table->integer('bet')->default('0');
+            $table->integer('credits')->default('0');
+            $table->string('status')->default('hanging');
             $table->timestamps();
         });
     }
